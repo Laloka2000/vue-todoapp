@@ -3,20 +3,33 @@
         <h1>Todo App</h1>
         <div class="input-container">
             <input v-model="newTodo" @keyup.enter="addTodo" type="text" placeholder="Add a new todo" />
+            <select v-model="newCategory">
+                <option value="">Select Category</option>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Urgent">Urgent</option>
+            </select>
             <button @click="addTodo" class="add-button">Add</button>
         </div>
-        <ul class="todo-list">
-            <li v-for="(todo, index) in todos" :key="index" class="todo-item">
+        <transition-group name="fade" tag="ul" class="todo-list">
+            <li v-for="(todo, index) in todos" :key="todo.id" class="todo-item">
                 <div class="todo-content" @click="toggleComplete(index)">
                     <span :class="{ 'completed': todo.completed }">{{ todo.text }}</span>
+                    <span class="category">({{ todo.category }})</span>
                 </div>
                 <button @click="startEditing(index)" class="edit-button">Edit</button>
                 <button @click="deleteTodo(index)" class="delete-button">Delete</button>
             </li>
-        </ul>
+        </transition-group>
         <div v-if="isEditing" class="edit-form">
             <h3>Edit Todo</h3>
             <input v-model="editingText" type="text" />
+            <select v-model="editingCategory">
+                <option value="">Select Category</option>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Urgent">Urgent</option>
+            </select>
             <button @click="saveEdit" class="save-button">Save</button>
             <button @click="cancelEdit" class="cancel-button">Cancel</button>
         </div>
@@ -30,22 +43,27 @@ export default {
     {
         return {
             newTodo: '',
+            newCategory: '',
             todos: [],
             isEditing: false,
             editingIndex: null,
-            editingText: ''
+            editingText: '',
+            editingCategory: ''
         };
     },
     methods: {
         addTodo()
         {
-            if (this.newTodo.trim() !== '')
+            if (this.newTodo.trim() !== '' && this.newCategory !== '')
             {
                 this.todos.push({
+                    id: Date.now(),
                     text: this.newTodo,
+                    category: this.newCategory,
                     completed: false
                 });
                 this.newTodo = '';
+                this.newCategory = '';
             }
         },
         deleteTodo(index)
@@ -61,15 +79,18 @@ export default {
             this.isEditing = true;
             this.editingIndex = index;
             this.editingText = this.todos[index].text;
+            this.editingCategory = this.todos[index].category;
         },
         saveEdit()
         {
-            if (this.editingText.trim() !== '')
+            if (this.editingText.trim() !== '' && this.editingCategory !== '')
             {
                 this.todos[this.editingIndex].text = this.editingText.trim();
+                this.todos[this.editingIndex].category = this.editingCategory;
                 this.isEditing = false;
                 this.editingIndex = null;
                 this.editingText = '';
+                this.editingCategory = '';
             }
         },
         cancelEdit()
@@ -77,6 +98,7 @@ export default {
             this.isEditing = false;
             this.editingIndex = null;
             this.editingText = '';
+            this.editingCategory = '';
         }
     }
 };
@@ -109,6 +131,14 @@ input[type="text"] {
     margin-right: 10px;
 }
 
+select {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
 .add-button {
     padding: 12px;
     background-color: #42b983;
@@ -121,6 +151,16 @@ input[type="text"] {
 
 .add-button:hover {
     background-color: #369b74;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
 }
 
 .todo-list {
@@ -137,6 +177,11 @@ input[type="text"] {
     margin: 10px 0;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.todo-item:hover {
+    transform: scale(1.02);
 }
 
 .todo-content {
@@ -147,6 +192,12 @@ input[type="text"] {
 .completed {
     text-decoration: line-through;
     color: #888;
+}
+
+.category {
+    font-style: italic;
+    color: #555;
+    margin-left: 10px;
 }
 
 .edit-button {
@@ -184,6 +235,7 @@ input[type="text"] {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.5s;
 }
 
 .save-button {
