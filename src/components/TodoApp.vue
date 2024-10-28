@@ -10,10 +10,16 @@
                 <div class="todo-content" @click="toggleComplete(index)">
                     <span :class="{ 'completed': todo.completed }">{{ todo.text }}</span>
                 </div>
-                <button @click="editTodo(index)" class="edit-button">Edit</button>
+                <button @click="startEditing(index)" class="edit-button">Edit</button>
                 <button @click="deleteTodo(index)" class="delete-button">Delete</button>
             </li>
         </ul>
+        <div v-if="isEditing" class="edit-form">
+            <h3>Edit Todo</h3>
+            <input v-model="editingText" type="text" />
+            <button @click="saveEdit" class="save-button">Save</button>
+            <button @click="cancelEdit" class="cancel-button">Cancel</button>
+        </div>
     </div>
 </template>
 
@@ -24,7 +30,10 @@ export default {
     {
         return {
             newTodo: '',
-            todos: []
+            todos: [],
+            isEditing: false,
+            editingIndex: null,
+            editingText: ''
         };
     },
     methods: {
@@ -47,13 +56,27 @@ export default {
         {
             this.todos[index].completed = !this.todos[index].completed;
         },
-        editTodo(index)
+        startEditing(index)
         {
-            const updatedText = prompt('Edit your todo:', this.todos[index].text);
-            if (updatedText !== null && updatedText.trim() !== '')
+            this.isEditing = true;
+            this.editingIndex = index;
+            this.editingText = this.todos[index].text;
+        },
+        saveEdit()
+        {
+            if (this.editingText.trim() !== '')
             {
-                this.todos[index].text = updatedText.trim();
+                this.todos[this.editingIndex].text = this.editingText.trim();
+                this.isEditing = false;
+                this.editingIndex = null;
+                this.editingText = '';
             }
+        },
+        cancelEdit()
+        {
+            this.isEditing = false;
+            this.editingIndex = null;
+            this.editingText = '';
         }
     }
 };
@@ -152,6 +175,43 @@ input[type="text"] {
 }
 
 .delete-button:hover {
+    background-color: #c0392b;
+}
+
+.edit-form {
+    margin-top: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.save-button {
+    padding: 10px;
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+    background-color: #369b74;
+}
+
+.cancel-button {
+    padding: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.cancel-button:hover {
     background-color: #c0392b;
 }
 </style>
