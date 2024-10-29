@@ -11,8 +11,19 @@
             </select>
             <button @click="addTodo" class="add-button">Add</button>
         </div>
+
+        <!-- Search and Filter Options -->
+        <div class="filter-container">
+            <input v-model="searchQuery" type="text" placeholder="Search todos..." />
+            <select v-model="filterStatus">
+                <option value="all">All</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+
         <transition-group name="fade" tag="ul" class="todo-list">
-            <li v-for="(todo, index) in todos" :key="todo.id" class="todo-item">
+            <li v-for="(todo, index) in filteredTodos" :key="todo.id" class="todo-item">
                 <div class="todo-content" @click="toggleComplete(index)">
                     <span :class="{ 'completed': todo.completed }">{{ todo.text }}</span>
                     <span class="category">({{ todo.category }})</span>
@@ -48,8 +59,24 @@ export default {
             isEditing: false,
             editingIndex: null,
             editingText: '',
-            editingCategory: ''
+            editingCategory: '',
+            searchQuery: '',
+            filterStatus: 'all'
         };
+    },
+    computed: {
+        filteredTodos()
+        {
+            return this.todos.filter(todo =>
+            {
+                const matchesSearch = todo.text.toLowerCase().includes(this.searchQuery.toLowerCase());
+                const matchesFilter =
+                    this.filterStatus === 'all' ||
+                    (this.filterStatus === 'completed' && todo.completed) ||
+                    (this.filterStatus === 'pending' && !todo.completed);
+                return matchesSearch && matchesFilter;
+            });
+        }
     },
     methods: {
         addTodo()
@@ -106,20 +133,31 @@ export default {
 
 <style scoped>
 .todo-container {
-    max-width: 600px;
-    margin: 50px auto;
+    max-width: 100%;
+    margin: 20px;
+    padding: 20px;
     text-align: center;
     font-family: 'Poppins', sans-serif;
     background-color: #f9f9f9;
-    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.input-container {
+.input-container,
+.filter-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+
+    .input-container,
+    .filter-container {
+        flex-direction: row;
+        justify-content: center;
+    }
 }
 
 input[type="text"] {
@@ -127,8 +165,8 @@ input[type="text"] {
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    flex: 1;
     margin-right: 10px;
+    flex: 1;
 }
 
 select {
@@ -147,6 +185,7 @@ select {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-top: 10px;
 }
 
 .add-button:hover {
@@ -170,7 +209,8 @@ select {
 
 .todo-item {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     background-color: #ffffff;
     padding: 15px;
@@ -178,6 +218,12 @@ select {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s;
+}
+
+@media (min-width: 768px) {
+    .todo-item {
+        flex-direction: row;
+    }
 }
 
 .todo-item:hover {
@@ -206,7 +252,7 @@ select {
     border: none;
     border-radius: 8px;
     padding: 10px;
-    margin-right: 10px;
+    margin-top: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -221,6 +267,7 @@ select {
     border: none;
     border-radius: 8px;
     padding: 10px;
+    margin-top: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
