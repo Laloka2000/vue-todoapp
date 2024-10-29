@@ -9,6 +9,13 @@
                 <option value="Personal">Personal</option>
                 <option value="Urgent">Urgent</option>
             </select>
+            <!-- Priority Selector -->
+            <select v-model="newPriority">
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
             <button @click="addTodo" class="add-button">Add</button>
         </div>
 
@@ -23,10 +30,11 @@
         </div>
 
         <transition-group name="fade" tag="ul" class="todo-list">
-            <li v-for="(todo, index) in filteredTodos" :key="todo.id" class="todo-item">
+            <li v-for="(todo, index) in filteredTodos" :key="todo.id" class="todo-item" :class="todo.priority">
                 <div class="todo-content" @click="toggleComplete(index)">
                     <span :class="{ 'completed': todo.completed }">{{ todo.text }}</span>
                     <span class="category">({{ todo.category }})</span>
+                    <span class="priority">[{{ todo.priority }}]</span>
                 </div>
                 <button @click="startEditing(index)" class="edit-button">Edit</button>
                 <button @click="deleteTodo(index)" class="delete-button">Delete</button>
@@ -40,6 +48,13 @@
                 <option value="Work">Work</option>
                 <option value="Personal">Personal</option>
                 <option value="Urgent">Urgent</option>
+            </select>
+            <!-- Edit Priority Selector -->
+            <select v-model="editingPriority">
+                <option value="">Select Priority</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
             </select>
             <button @click="saveEdit" class="save-button">Save</button>
             <button @click="cancelEdit" class="cancel-button">Cancel</button>
@@ -55,16 +70,19 @@ export default {
         return {
             newTodo: '',
             newCategory: '',
+            newPriority: '', // Added priority property for new todos
             todos: [],
             isEditing: false,
             editingIndex: null,
             editingText: '',
             editingCategory: '',
-            searchQuery: '',
-            filterStatus: 'all'
+            editingPriority: '', // Added priority property for editing todos
+            searchQuery: '', // Added search query for searching todos
+            filterStatus: 'all' // Added filter status to filter todos
         };
     },
     computed: {
+        // Computed property to filter and search todos
         filteredTodos()
         {
             return this.todos.filter(todo =>
@@ -81,16 +99,18 @@ export default {
     methods: {
         addTodo()
         {
-            if (this.newTodo.trim() !== '' && this.newCategory !== '')
+            if (this.newTodo.trim() !== '' && this.newCategory !== '' && this.newPriority !== '')
             {
                 this.todos.push({
                     id: Date.now(),
                     text: this.newTodo,
                     category: this.newCategory,
+                    priority: this.newPriority, // Added priority to new todo
                     completed: false
                 });
                 this.newTodo = '';
                 this.newCategory = '';
+                this.newPriority = ''; // Reset priority after adding todo
             }
         },
         deleteTodo(index)
@@ -107,17 +127,20 @@ export default {
             this.editingIndex = index;
             this.editingText = this.todos[index].text;
             this.editingCategory = this.todos[index].category;
+            this.editingPriority = this.todos[index].priority; // Set priority for editing
         },
         saveEdit()
         {
-            if (this.editingText.trim() !== '' && this.editingCategory !== '')
+            if (this.editingText.trim() !== '' && this.editingCategory !== '' && this.editingPriority !== '')
             {
                 this.todos[this.editingIndex].text = this.editingText.trim();
                 this.todos[this.editingIndex].category = this.editingCategory;
+                this.todos[this.editingIndex].priority = this.editingPriority; // Save priority for edited todo
                 this.isEditing = false;
                 this.editingIndex = null;
                 this.editingText = '';
                 this.editingCategory = '';
+                this.editingPriority = ''; // Reset editing priority
             }
         },
         cancelEdit()
@@ -126,6 +149,7 @@ export default {
             this.editingIndex = null;
             this.editingText = '';
             this.editingCategory = '';
+            this.editingPriority = ''; // Reset editing priority
         }
     }
 };
