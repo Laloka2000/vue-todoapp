@@ -70,19 +70,26 @@ export default {
         return {
             newTodo: '',
             newCategory: '',
-            newPriority: '', // Added priority property for new todos
-            todos: [],
+            newPriority: '', 
+            todos: JSON.parse(localStorage.getItem('todos')) || [],
             isEditing: false,
             editingIndex: null,
             editingText: '',
             editingCategory: '',
-            editingPriority: '', // Added priority property for editing todos
-            searchQuery: '', // Added search query for searching todos
-            filterStatus: 'all' // Added filter status to filter todos
+            editingPriority: '',
+            searchQuery: '',
+            filterStatus: 'all'
         };
     },
+    watch: {
+        todos: {
+            handler(newTodos){
+                localStorage.setItem('todos', JSON.stringify(newTodos));
+            },
+            deep: true
+        }
+    },
     computed: {
-        // Computed property to filter and search todos
         filteredTodos()
         {
             return this.todos.filter(todo =>
@@ -105,12 +112,12 @@ export default {
                     id: Date.now(),
                     text: this.newTodo,
                     category: this.newCategory,
-                    priority: this.newPriority, // Added priority to new todo
+                    priority: this.newPriority, 
                     completed: false
                 });
                 this.newTodo = '';
                 this.newCategory = '';
-                this.newPriority = ''; // Reset priority after adding todo
+                this.newPriority = ''; 
             }
         },
         deleteTodo(index)
